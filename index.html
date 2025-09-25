@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>マイク音声リアルタイムスピーカー</title>
+  <title>マイク音声ループバック</title>
   <style>
+    /* ダークモード基調 */
     body {
       margin: 0;
       padding: 0;
@@ -61,7 +62,6 @@
     <button id="stop" disabled>停止</button>
   </div>
   <footer>Powered by 🥴👍</footer>
-
   <script>
     let audioContext;
     let mediaStream;
@@ -72,8 +72,18 @@
 
     startButton.addEventListener("click", async () => {
       try {
-        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // 音声処理を無効化して「通話モード」回避
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false
+          }
+        });
+
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        await audioContext.resume(); // モバイル向け安定性対策
+
         source = audioContext.createMediaStreamSource(mediaStream);
         source.connect(audioContext.destination);
 
