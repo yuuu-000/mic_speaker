@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>マイク音声リアルタイムスピーカー</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #1e1e1e;
+      color: #ffffff;
+      font-family: "Segoe UI", "Roboto", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-size: 20px;
+      color: #FFDD55;
+    }
+
+    button {
+      background-color: transparent;
+      border: 2px solid #FFDD55;
+      color: #FFDD55;
+      font-size: 17px;
+      padding: 10px 20px;
+      margin: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #FFDD55;
+      color: #1e1e1e;
+    }
+
+    button:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    footer {
+      position: absolute;
+      bottom: 10px;
+      font-size: 0.8rem;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎤 マイク音声をリアルタイム再生</h1>
+  <div>
+    <button id="start">開始</button>
+    <button id="stop" disabled>停止</button>
+  </div>
+  <footer>Powered by 🥴👍</footer>
+
+  <script>
+    let audioContext;
+    let mediaStream;
+    let source;
+
+    const startButton = document.getElementById("start");
+    const stopButton = document.getElementById("stop");
+
+    startButton.addEventListener("click", async () => {
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        source = audioContext.createMediaStreamSource(mediaStream);
+        source.connect(audioContext.destination);
+
+        startButton.disabled = true;
+        stopButton.disabled = false;
+        console.log("マイク音声の再生を開始しました");
+      } catch (err) {
+        console.error("マイクへのアクセスに失敗:", err);
+        alert("マイクの使用が許可されていないか、対応していません。");
+      }
+    });
+
+    stopButton.addEventListener("click", () => {
+      if (source) source.disconnect();
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+      }
+      if (audioContext) audioContext.close();
+
+      startButton.disabled = false;
+      stopButton.disabled = true;
+      console.log("マイク音声の再生を停止しました");
+    });
+  </script>
+</body>
+</html>
